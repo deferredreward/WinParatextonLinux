@@ -51,7 +51,8 @@ Usability (each verified with a log, details in the findings doc):
 - A maximized Paratext window cannot be dragged (no WM title bar). KWin: `Meta+PgUp`,
   `Meta+drag`, `Meta+Shift+Right`, `Alt+F3`.
 - Paratext steals focus back from other Wine apps (Logos) within ~50 ms of losing it. KWin
-  window rule for `paratext.exe`: focus-stealing prevention Extreme, forced (`kwinrulesrc`).
+  focus-stealing-prevention rules do NOT work for Wine windows (they also block user clicks;
+  Wine's globally-active focus model). Use `UseTakeFocus=N` in the bottle instead.
 - Splash-screen crash (`AccessViolation` in `xul.dll`, Gecko init): happens on the **first
   launch after any display change** (3 of 3 today); the next launch works (3 of 3). Just
   launch again. (Earlier blamed on a Gecko `user.js`; that was wrong.)

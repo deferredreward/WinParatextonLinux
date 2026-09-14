@@ -147,14 +147,19 @@ bottle (`tools/TinyWin.cs`, same `Decorated=N`) does not do this, so it is Parat
 foreground logic reacting to focus loss, and Wine's default `UseTakeFocus=Y` lets its X11
 driver grab X input focus back. KWin's default focus-stealing prevention (Low) allows it.
 
-Fix applied (WM-side, scoped): `~/.config/kwinrulesrc` rule for `wmclass=paratext.exe` with
-`fsplevelrule=2` (force); `gdbus call --session --dest org.kde.KWin --object-path /KWin
---method org.kde.KWin.reconfigure` applies it live. `fsplevel=4` (Extreme) stopped the steal
-but also stopped Paratext taking focus when the user clicked it (Wine's `WM_TAKE_FOCUS` +
-`XSetInputFocus` handshake reads as a steal at Extreme) -- unusable. Now `fsplevel=3` (High):
-inactive apps cannot activate themselves, user clicks always work. Result: [pending]. Fallback if needed: `HKCU\Software\Wine\X11 Driver\UseTakeFocus=N` in the
-Paratext bottle (Bottles: `take_focus: false` -- note Bottles had not actually written that
-value to the registry even though `bottle.yml` said false).
+**KWin window rules cannot fix this (verified).** A `kwinrulesrc` rule for `wmclass=paratext.exe`
+forcing focus-stealing prevention stopped the steal, but at Extreme (4) *and* at High (3)
+Paratext could no longer take focus when the user clicked it: an `_NET_ACTIVE_WINDOW` recording
+over 75 s showed Paratext never becoming active at all. Reason: Wine uses the X11 "globally
+active" focus model (the client calls `XSetInputFocus` after `WM_TAKE_FOCUS`), and KWin's
+prevention judges that client call whether it follows a user click or not. Rule removed.
+
+**Fix (Wine-side, this bottle):** `HKCU\Software\Wine\X11 Driver\UseTakeFocus = N` -- Wine
+switches to the passive model where the window manager assigns focus and Wine accepts it, so
+Wine cannot grab focus back on its own and user clicks are handled by KWin. Bottles' parameter
+is `take_focus: false` (note: `bottle.yml` already said false but the value had never been
+written to the registry; write it explicitly and verify with `reg query`). Takes effect on the
+next Paratext start (no display change involved, so no splash crash expected). Result: [pending].
 
 ## Getting evidence instead of guessing
 
