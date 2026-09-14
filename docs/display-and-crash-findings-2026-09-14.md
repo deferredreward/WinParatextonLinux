@@ -17,17 +17,17 @@ was changed, and whether the result was verified. Unverified items are marked.
 ## Things that made it worse (do not repeat)
 
 - **Splash-screen crash: `AccessViolationException` in `xul.dll` inside
-  `Gecko.Xpcom.Initialize -> CreateWindowlessBrowser`.** Seen twice (14:45, 15:08), both
-  within 1-4 minutes of an XWayland screen reconfiguration (scale/primary changes); two
-  launches with identical configuration after the display had been stable 5-10 minutes
-  succeeded. In the crashing runs Gecko's first widget immediately pulled
-  `opengl32 -> wined3d -> dxgi -> d3d11` and faulted; in the good runs it went
-  `xul.dll -> dwrite.dll` and D3D came later. Inference (not proven): Gecko's graphics probe
-  hits a wined3d/GL context failure right after a display change and dereferences NULL.
-  **Rule: after changing monitors or scale, wait a few minutes before launching; if it dies
-  at the splash, launch again.** The first write-up blamed a Gecko `user.js`; the crash
-  recurred with that file gone, so that was wrong. A `user.js` forcing software rendering was
-  tried once and is not known to help; it is not in place.
+  `Gecko.Xpcom.Initialize -> CreateWindowlessBrowser`.** Seen three times (14:45, 15:08,
+  15:49), each the **first launch after a display configuration change** (XWayland scale,
+  monitor scale, primary monitor). Each time the **next launch succeeded** (14:52, 15:12,
+  15:50 -- the last one 30 s after its crash). In the crashing runs Gecko's first widget
+  immediately pulled `opengl32 -> wined3d -> dxgi -> d3d11` and faulted at the same
+  instruction; in the good runs it went `xul.dll -> dwrite.dll` and never touched D3D at init.
+  Inference (not proven): Gecko re-probes the graphics stack when the display configuration it
+  cached has changed, the probe through wined3d dereferences NULL, and the crash leaves state
+  that makes the next launch skip the probe. **Rule: after changing monitors, scale or primary,
+  expect the first Paratext launch to die at the splash; launch again.** (The first write-up
+  blamed a Gecko `user.js`; that was wrong -- the crash recurred with the file gone.)
 - **Wine's Wayland driver (`Graphics = wayland`).** The main menu strip *did* appear (which is
   how the decoration cause was found), but: `System.OverflowException` in
   `InputLanguage.get_Culture()` from `WM_INPUTLANGCHANGEREQUEST` (a third bug in the same .NET
