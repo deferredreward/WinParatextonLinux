@@ -25,11 +25,13 @@ was changed, and whether the result was verified. Unverified items are marked.
   instruction; in the good runs it went `xul.dll -> dwrite.dll` and never touched D3D at init.
   Inference (not proven): Gecko re-probes the graphics stack when the display configuration it
   cached has changed, the probe through wined3d dereferences NULL, and the crash leaves state
-  that makes the next launch skip the probe. A fourth crash at 16:01 followed the previous
-  instance being killed rather than closed, ~9 minutes after the last display change, so the
-  trigger is **not** established -- only the remedy is. **Rule: if Paratext dies at the splash
-  screen, launch it again; the second launch has worked every time (3/3 so far).** (The first
-  write-up blamed a Gecko `user.js`; that was wrong -- the crash recurred with the file gone.)
+  that makes the next launch skip the probe. A fourth crash (16:01) looked like a
+  counterexample -- 9 minutes after the last display change -- but that change (laptop back to
+  scale 1.75 at 15:52) happened while an instance launched *before* it was still running, so
+  16:01 was in fact the first new launch after it. 4 of 4 crashes fit; the elapsed time does not
+  matter, the launch count does. **Rule: the first Paratext launch after any display change
+  (scale, primary, monitor) dies at the splash screen; the second one works (3/3 so far).**
+  (The first write-up blamed a Gecko `user.js`; that was wrong.)
 - **Wine's Wayland driver (`Graphics = wayland`).** The main menu strip *did* appear (which is
   how the decoration cause was found), but: `System.OverflowException` in
   `InputLanguage.get_Culture()` from `WM_INPUTLANGCHANGEREQUEST` (a third bug in the same .NET
