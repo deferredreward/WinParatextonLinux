@@ -30,6 +30,10 @@ One runner with a recent **staging** build clears both.
 
 ## Steps
 
+> The startup crash fix below was verified 2026-09-14 and Paratext runs. Getting it *usable*
+> needed four more changes found the same afternoon; they are in
+> `docs/display-and-crash-findings-2026-09-14.md` and summarised in `STATE.md`. Do those too.
+
 ### 1. Confirm the bug before changing anything
 
 Compile and run the probe inside the bottle. `csc.exe` mangles paths passed through
@@ -89,9 +93,11 @@ flatpak run --command=bottles-cli com.usebottles.bottles edit -b Paratext \
 flatpak run --command=bottles-cli com.usebottles.bottles shell -b Paratext -i 'wineboot -u'
 ```
 
-**This takes a long time — about 35 minutes here.** Most of it is .NET's `mscorsvw`
-regenerating native images for the new Wine. It is working, not hung; `top` shows `mscorsvw`
-pinning a core. Let it finish rather than interrupting it.
+**Expect this step to misbehave.** On the run that produced this document it ran for roughly
+35 minutes wall-clock, opened a browser tab, and was found with Wine error dialogs on screen
+when the user came back; it nonetheless exited 0 and the prefix was fine afterwards. The
+first write-up called this "normal, let it finish" -- that was wrong. Treat it as a hang with
+an unclear trigger: dismiss any dialogs, let it exit, then verify with the probe below.
 
 Two things seen during the update that are **not** failures:
 
@@ -99,6 +105,7 @@ Two things seen during the update that are **not** failures:
   That is the .NET shim firing for the **32-bit** `syswow64\rundll32.exe` running wine.inf's
   `Wow64Install` section. Paratext 9.5 is 64-bit only, `wineboot -u` still exits 0, and both
   `Framework\v4.0.30319\mscorlib.dll` and `Framework64\v4.0.30319\mscorlib.dll` survive.
+  This is probably also what the update hangs on.
 - Streams of `err:ole:ifproxy_release_public_refs` and `err:ole:get_stub_manager_from_ipid`.
   Noise.
 
