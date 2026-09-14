@@ -1,0 +1,11 @@
+[General]
+count=1
+rules=paratext-no-focus-steal
+
+[paratext-no-focus-steal]
+Description=Paratext (Wine): block focus stealing
+fsplevel=4
+fsplevelrule=2
+wmclass=paratext.exe
+wmclasscomplete=false
+wmclassmatch=1
