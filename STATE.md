@@ -43,7 +43,9 @@ Usability (each verified with a log, details in the findings doc):
 - **Turn WM decorations off** (`Decorated=N`). Paratext 9 draws its own title bar containing
   the main menu (the hamburger + logo + search strip); a WM title bar covers it. The strip
   renders on black under Wine (no DWM); cosmetic.
-- Wine DPI: `LogPixels` **and** Bottles' `custom_dpi` must agree or Bottles reverts it.
+- Wine DPI: `LogPixels` **and** Bottles' `custom_dpi` must agree or Bottles reverts it. A
+  change is only picked up after **all** Wine processes in the bottle exit (`wineserver -k`);
+  Wine caches system DPI for the wineserver session. Verified the hard way.
 - A maximized Paratext window cannot be dragged (no WM title bar). KWin: `Meta+PgUp`,
   `Meta+drag`, `Meta+Shift+Right`, `Alt+F3`.
 - Splash-screen crash (`AccessViolation` in `xul.dll`, Gecko init) is intermittent and so far

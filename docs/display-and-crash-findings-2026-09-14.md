@@ -12,7 +12,7 @@ was changed, and whether the result was verified. Unverified items are marked.
 | No main menu (the ☰ / logo / "Search menus/help" strip) | Paratext 9 draws a custom title bar; with WM decorations on, KWin's title bar covers it | `HKCU\Software\Wine\X11 Driver\Decorated = N` (`decorated: false` in Bottles) | Yes: strip appears. Its background is black (no DWM glass); cosmetic |
 | Menu bar / popups dead after moving a window to the second monitor | Wayland compositor scaling of XWayland clients with two monitors at different scales, plus (probably) the X primary monitor not being at the origin | See "Multi-monitor" below | Partially; see below |
 | Main window cannot be moved or resized | It is maximized (Paratext restores its saved state) and there is no WM title bar | KWin: `Meta+PgUp` un-maximize, `Meta+drag` move, `Meta+Shift+Right` next screen, `Alt+F3` menu | Yes |
-| Too small on a 2560x1440 monitor | Wine renders at 96 DPI | `HKCU\Control Panel\Desktop\LogPixels = 168` (**and** `custom_dpi: 168` in `bottle.yml`, or Bottles reverts it) | Yes |
+| Too small on a 2560x1440 monitor | Wine renders at 96 DPI | `HKCU\Control Panel\Desktop\LogPixels = 168` (**and** `custom_dpi: 168` in `bottle.yml`, or Bottles reverts it). **Takes effect only after every Wine process in the bottle has exited** (`wineserver -k`): Wine caches the system DPI per wineserver session, verified by a probe still reporting 1.75x-scaled monitors after the registry said 96. | Yes |
 
 ## Things that made it worse (do not repeat)
 
@@ -75,8 +75,11 @@ external monitor does not take input, in every configuration tried -- default mi
 laptop panel. **It is Wine, not KDE:** a plain X11 program (`xmessage`) placed on the
 external monitor took its button click normally, twice, while a Wine window there did not.
 Under uniform scale the Wine window comes back to life when moved back to the laptop (under
-the default mixed scale it stayed dead). Next: a .NET probe of what Wine believes the monitor
-layout and cursor position are (`tools/ScreenProbe.cs`). Workable answer on Wayland today:
+the default mixed scale it stayed dead). `tools/ScreenProbe.cs` shows Wine knows both
+monitors (`SM_CMONITORS=2`, external at negative coordinates, all sizes divided by the DPI
+factor for this DPI-unaware process). Two 40-60 s cursor sweeps never produced a position on
+the external monitor, but the sweeps were not controlled well enough to conclude from;
+`tools/ClickProbe.cs` (logs the position of each click) is the controlled version. Workable answer on Wayland today:
 keep Paratext on one monitor. Likely better: a Plasma (X11) session.
 
 Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
