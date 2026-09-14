@@ -63,17 +63,24 @@ Setup: laptop eDP-1 2560x1600 at scale 1.75 (primary, placed at +400,+1440); ext
    shakes on the laptop panel, where KWin is upscaling the X window 1.75x. Not investigated;
    the X11 session test comes first.
 
-Conclusion for Wayland: with two monitors at different scales, KWin presents the same X11
-window at a different scale depending on which output it is on, and a Wine window that
-crosses between them stops taking input. Neither the global XWayland scale setting nor the
-primary monitor fixes it. Workable answer on Wayland: keep Paratext on one monitor (it works
-fully there). Better answer: a Plasma (X11) session, where one scale applies everywhere.
+5. Both outputs set to the **same scale (1)** with `kscreen-doctor output.eDP-1.scale.1`:
+   X11 sees both monitors at physical pixels (2960x3040 screen, `Xft.dpi=96`, Xwayland
+   `Scale=1`), so KWin never rescales a window when it crosses outputs. Paratext launched
+   (after the display had settled) and worked on the laptop; **moved fully onto the external
+   it stopped taking input again.** Scaling is not the cause.
 
-Note the trade-off of item 2: with two monitors at different scales there is no single Wine
-`LogPixels` that is right on both; 168 fits the external, is oversized on the laptop.
+Conclusion for Wayland (KDE Plasma 6.7.5, this laptop + HDMI monitor): a Wine window on the
+external monitor does not take input, in every configuration tried -- default mixed scale,
+`XwaylandClientsScale=false`, external as primary, and uniform scale. It works fully on the
+laptop panel. Whether this is KWin/XWayland or Wine is being separated with a plain X11
+program on the external monitor. Workable answer on Wayland today: keep Paratext on one
+monitor. Better answer: a Plasma (X11) session, where Wine talks to a real X server.
 
-Fallback that avoids the whole class: a **Plasma (X11) session** (`dnf install
-plasma-workspace-x11`), being tested next. X11 has one desktop scale for all monitors.
+Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
+bar) -- KWin `Meta+PgUp` un-maximizes, `Meta+Shift+Right`/`Left` (arrow keys) sends a window
+to the next screen, `Meta+drag` moves; KWin zoom is `Meta+=` / `Meta+-` / `Meta+0` (easy to hit
+by accident). Paratext's black title strip can be left painted on the old monitor after a
+move; repaint artifact only.
 
 ## Getting evidence instead of guessing
 

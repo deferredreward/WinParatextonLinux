@@ -14,12 +14,11 @@ Paratext 9.5 **runs and is usable on one monitor**: starts, main menu present, d
 installs resources, opens OT and NT resources, no crashes in a full session. Verified on
 Fedora 44 + Bottles 67.3 + `kron4ek-wine-11.17-staging-amd64` under KDE Plasma 6.7.5.
 
-Still open: a second monitor on a **Wayland** session. A Wine window moved to the other
-monitor stops taking input and stays dead when moved back; the XWayland scale setting and
-the primary-monitor position were both tested and neither fixes it (see
-`docs/display-and-crash-findings-2026-09-14.md`). On Wayland, keep Paratext on one monitor.
-A **Plasma (X11)** session is the fallback being tested next; the maximized window also
-flickers on the upscaled laptop panel under Wayland, untested on X11.
+Still open: a second monitor on a **Wayland** session. A Wine window moved to the external
+monitor stops taking input, in every configuration tried (mixed scale, X11-apps-scale-
+themselves, external as primary, uniform scale) -- see
+`docs/display-and-crash-findings-2026-09-14.md`. Scaling is ruled out. On Wayland, keep
+Paratext on one monitor. A **Plasma (X11)** session is the fallback being tested next.
 
 Read in this order: `docs/verified-recipe-fedora.md` (get it to start), then
 `docs/display-and-crash-findings-2026-09-14.md` (get it usable).
@@ -69,6 +68,7 @@ Tooling:
 
 ## Open questions
 
+- Is the dead-input-on-second-monitor KWin/XWayland or Wine? (Plain-X11-app test in progress.)
 - Does everything behave under Plasma (X11)? (Expected to sidestep the multi-monitor class.)
 - Send/Receive on this runner, plugins, printing, spell check, non-Latin keyboards/IME.
 - Whether a non-staging runner plus `tools/keyboard-layouts-00000409.reg` is equivalent.
