@@ -88,7 +88,17 @@ X11 driver registry has no pointer-grab settings (`GrabFullscreen`, `GrabPointer
 Bottles `fullscreen_capture`/`take_focus` off), so a configured grab is ruled out.
 
 The valid experiment is a Wine *window* (`tools/TinyWin.cs`) dragged to the external monitor
-and clicked, run with `WINEDEBUG=+event` to see whether X `ButtonPress` reaches Wine at all. Workable answer on Wayland today:
+and clicked, run with `WINEDEBUG=+event`. **Result (168 DPI session, laptop primary, uniform
+scale):** after the move Wine received 10 `ButtonPress`, 10 `ButtonRelease` and 536
+`MotionNotify` for the window and kept processing events on the app's thread, yet the app got
+**zero `WM_LBUTTONDOWN`** and stopped repainting. There was no `ConfigureNotify` storm (all 236
+came during the drag, none after). Wine's own record of the window was sane: `WM_MOVE` reported
+`{X=316,Y=-339,W=700,H=300}` on `\\.\DISPLAY2`. So the X server delivers input to Wine, Wine
+knows where the window is, and Wine still fails to route the input to it. In Wine, mouse input
+is routed by position (`WindowFromPoint` at dispatch); the failure is in that mapping for a
+window on a monitor at negative coordinates, with DPI virtualization (168/96) as the other
+suspect. Being separated by re-running at a true 96 DPI (fresh wineserver) and with the
+external as primary (all-positive coordinates). Workable answer on Wayland today:
 keep Paratext on one monitor. Likely better: a Plasma (X11) session.
 
 Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
