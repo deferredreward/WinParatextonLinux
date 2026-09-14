@@ -77,9 +77,18 @@ external monitor took its button click normally, twice, while a Wine window ther
 Under uniform scale the Wine window comes back to life when moved back to the laptop (under
 the default mixed scale it stayed dead). `tools/ScreenProbe.cs` shows Wine knows both
 monitors (`SM_CMONITORS=2`, external at negative coordinates, all sizes divided by the DPI
-factor for this DPI-unaware process). Two 40-60 s cursor sweeps never produced a position on
-the external monitor, but the sweeps were not controlled well enough to conclude from;
-`tools/ClickProbe.cs` (logs the position of each click) is the controlled version. Workable answer on Wayland today:
+factor for this DPI-unaware process).
+
+**Dead end, recorded so nobody repeats it:** polling `GetCursorPos`/`GetAsyncKeyState` from a
+windowless probe (`tools/CursorProbe.cs`, `tools/ClickProbe.cs`) cannot measure this on a
+Wayland session. Rootless XWayland only learns the pointer position while it is over an X11
+window; over the (Wayland-native) KDE desktop the X pointer is frozen and clicks are invisible.
+The probes therefore reported a frozen pointer and no clicks regardless of the bug. The Wine
+X11 driver registry has no pointer-grab settings (`GrabFullscreen`, `GrabPointer` unset;
+Bottles `fullscreen_capture`/`take_focus` off), so a configured grab is ruled out.
+
+The valid experiment is a Wine *window* (`tools/TinyWin.cs`) dragged to the external monitor
+and clicked, run with `WINEDEBUG=+event` to see whether X `ButtonPress` reaches Wine at all. Workable answer on Wayland today:
 keep Paratext on one monitor. Likely better: a Plasma (X11) session.
 
 Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
