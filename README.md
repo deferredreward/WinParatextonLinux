@@ -34,12 +34,25 @@ copied out of Wine in the first place.
 
 ## Start here
 
+**Just want it running?** Two ways:
+
+1. `./setup-paratext-linux.sh` -- automates every verified step and stops with instructions at
+   the two things only you can do (Bottles' dotnet48/gdiplus dependencies, the Paratext
+   installer). `--check` only reports. `--dpi 144` sets the Wine UI scale.
+2. `docs/ai-agent-prompt.md` -- paste into an AI coding agent (Claude Code etc.) and let it
+   drive, with the guard-rails and dead ends built in.
+
+**Want to understand it?**
+
 **`docs/verified-recipe-fedora.md`** — the procedure that was actually run, with the expected
 output at each step, how long the slow step takes, and which alarming-looking errors are
 harmless.
 
 ## Files
 
+- `setup-paratext-linux.sh`: the setup/check script.
+- `docs/ai-agent-prompt.md`: prompt for an AI agent to do the setup for you.
+- `docs/forum-post.md`: a post to adapt for translation forums.
 - `docs/verified-recipe-fedora.md`: getting it to start. Read this first.
 - `docs/display-and-crash-findings-2026-09-14.md`: getting it usable — DXVK, the hidden main
   menu, multi-monitor on Wayland, and the things that made it worse. Read this second.
