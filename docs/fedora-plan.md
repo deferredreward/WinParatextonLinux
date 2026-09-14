@@ -1,5 +1,9 @@
 # Fedora session plan: get past the keyboard/culture crash
 
+> **Superseded by `docs/verified-recipe-fedora.md`.** This is the plan as written *before*
+> the attempt, kept for its reasoning. Step 2 is what worked; the notes below about what
+> might go wrong were mostly not borne out. Follow the verified recipe instead.
+
 Written 2026-09-14 from research only (see `docs/research-2026-09-14-culture-error.md`).
 Each step says how we know it worked. Do them in order; stop at the first one that passes.
 

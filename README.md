@@ -1,30 +1,52 @@
 # Paratext 9.5+ on Linux (Fedora) via Wine
 
 Notes and a working recipe for running Windows Paratext 9.5 or newer on Linux, since SIL
-dropped native Linux builds after 9.4. Work in progress; nothing here is verified end to end
-yet.
+dropped native Linux builds after 9.4.
 
-## Status (2026-09-14)
+## Status (2026-09-14): working
 
-- Paratext 9.5 installs and registers under Bottles (Flatpak) on Fedora with `dotnet48` and
-  `gdiplus`; Send/Receive works.
-- Startup then dies with `Culture is not supported ... 0 (0x0000) is an invalid culture
-  identifier` from the keyboard-layout code.
-- Root cause found: a Wine bug (fixed in Wine 11.2, February 2026) where
-  `SystemParametersInfo(SPI_GETDEFAULTINPUTLANG)` never returned the layout handle. Every
-  Bottles house runner (Soda 11.0, Caffe 10.0, Vaniglia 10.19) and Fedora's own `wine` 11.0
-  package still have the bug. Kron4ek 11.17 runners in Bottles' catalog, and WineHQ's
-  `wine-staging`/`wine-devel` packages for Fedora, have the fix.
-- A second, adjacent bug (Wine bug 47439, missing `Keyboard Layouts` registry keys) is
-  fixed only in wine-staging builds, so the staging flavour of those runners is the one to
-  use.
-- Next: switch the bottle's runner and confirm. See `docs/fedora-plan.md`.
+Paratext 9.5 starts, loads its dictionaries, fetches licences from the Paratext registry, and
+opens a text — on Fedora 44 with Bottles (Flatpak) and a `wine-11.17 (Staging)` runner.
+
+The startup crash everyone hits (`Culture is not supported ... 0 (0x0000) is an invalid
+culture identifier`) is not a Paratext problem and not a configuration problem. It is two Wine
+bugs in a row in the keyboard-layout path:
+
+1. **Wine bug 40435** — `SystemParametersInfo(SPI_GETDEFAULTINPUTLANG)` returned success
+   without writing the layout handle, so .NET built `CultureInfo(0)` and threw. Fixed in
+   wine-11.2 (Feb 2026).
+2. **Wine bug 47439** — no `HKLM\...\Control\Keyboard Layouts` keys exist upstream, and .NET's
+   `InputLanguage.LayoutName` dereferences them unchecked. Fixed only in wine-staging.
+
+So the fix is one thing: **run a wine-staging build of 11.2 or newer.** Bottles' house runners
+(Soda 11.0, Caffe 10.0, Vaniglia 10.19) and Fedora's own `wine` package are all too old.
+`kron4ek-wine-11.17-staging-amd64`, already in Bottles' runner catalog, clears both.
+
+Nothing in the registry, in `LANG`/`LC_ALL`, in the bottle's language setting, or in Paratext
+itself can work around this on an older Wine — on the broken versions the value is never
+copied out of Wine in the first place.
+
+## Start here
+
+**`docs/verified-recipe-fedora.md`** — the procedure that was actually run, with the expected
+output at each step, how long the slow step takes, and which alarming-looking errors are
+harmless.
 
 ## Files
 
-- `docs/research-2026-09-14-culture-error.md`: the evidence trail for the crash and the fix.
-- `docs/fedora-plan.md`: step-by-step plan with a pass/fail check per step.
-- `tools/InputLangCheck.cs`: 40-line .NET probe that reproduces the crash without Paratext,
-  so a Wine build can be checked in seconds.
-- `tools/keyboard-layouts-00000409.reg`: registry fallback for non-staging Wine builds.
-- `STATE.md`: durable gotchas and open questions for anyone (human or agent) picking this up.
+- `docs/verified-recipe-fedora.md`: the working recipe. Read this one.
+- `docs/research-2026-09-14-culture-error.md`: the evidence trail — Wine source, the fixing
+  commit, the .NET and libpalaso code, and why the obvious workarounds cannot work.
+- `docs/fedora-plan.md`: the plan as written before the attempt. Kept for the reasoning;
+  superseded by the verified recipe.
+- `tools/InputLangCheck.cs`: 46-line .NET probe that reproduces the crash without Paratext.
+  Grades any Wine build in seconds — run it before blaming Paratext.
+- `tools/keyboard-layouts-00000409.reg`: registry fallback for non-staging Wine builds. Not
+  needed on a staging runner.
+- `STATE.md`: durable gotchas and open questions for anyone picking this up.
+
+## What is not yet known
+
+Opening a text works. Send/Receive on the new runner, plugins, the embedded Firefox panes,
+printing, spell check, and non-Latin keyboard/IME input have not been exercised yet. If you
+try them, please report what you find.
