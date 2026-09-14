@@ -1,0 +1,52 @@
+# Sanitized evidence excerpt (usernames/hostnames scrubbed). Wine 11.17 (Staging), Xwayland 24.1.13, KWin 6.7.5.
+
+## 1. WINEDEBUG=+event trace, test window (v1) dragged to the non-primary monitor, laptop = X primary
+## Event counts for the window's X id after it landed there (X delivers, app gets nothing):
+    536 MotionNotify
+      9 ButtonRelease
+      8 ButtonPress
+      7 EnterNotify
+      4 PropertyNotify
+      2 FocusOut
+      1 FocusIn
+      1 ClientMessage
+## ButtonPress lines:
+0114:trace:event:call_event_handler 199 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 636 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 637 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 637 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 637 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 640 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 645 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 646 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 646 ButtonPress for hwnd/window 0x1005e/1e00003
+0114:trace:event:call_event_handler 646 ButtonPress for hwnd/window 0x1005e/1e00003
+## Event loop still running on the same thread afterwards:
+0114:trace:event:X11DRV_ProcessEvents processed 2 events
+0114:trace:event:X11DRV_ProcessEvents processed 1 events
+0114:trace:event:X11DRV_ProcessEvents processed 26 events
+## Window rect as reported to the app by WM_MOVE at that time:
+MOVE window={X=316,Y=-339,Width=700,Height=300} on=\\.\DISPLAY2
+
+## 2. v2 test window (logs its own clicks), external monitor as X primary -> all coordinates non-negative: clicks on both monitors
+CLICK 2 screen=(219,112) window={X=0,Y=0,Width=700,Height=300} on=\\.\DISPLAY1
+CLICK 3 screen=(409,117) window={X=0,Y=0,Width=700,Height=300} on=\\.\DISPLAY1
+CLICK 4 screen=(558,359) window={X=445,Y=153,Width=700,Height=300} on=\\.\DISPLAY1
+CLICK 5 screen=(803,1159) window={X=523,Y=1020,Width=700,Height=300} on=\\.\DISPLAY2
+CLICK 6 screen=(971,1125) window={X=523,Y=1020,Width=700,Height=300} on=\\.\DISPLAY2
+CLICK 7 screen=(796,1203) window={X=523,Y=1020,Width=700,Height=300} on=\\.\DISPLAY2
+CLICK 8 screen=(1060,327) window={X=819,Y=188,Width=700,Height=300} on=\\.\DISPLAY1
+CLICK 9 screen=(935,465) window={X=819,Y=188,Width=700,Height=300} on=\\.\DISPLAY1
+
+## 3. Control: same v2 window, laptop as X primary again -> external at negative Y: clicks only on the laptop
+CLICK 1 screen=(210,189) window={X=0,Y=0,Width=700,Height=300} on=\\.\DISPLAY1
+CLICK 2 screen=(796,255) window={X=379,Y=137,Width=700,Height=300} on=\\.\DISPLAY1
+CLICK 3 screen=(586,366) window={X=379,Y=137,Width=700,Height=300} on=\\.\DISPLAY1
+## window positions while on the external (WM_MOVE), none of which received clicks:
+MOVE window={X=61,Y=-471,Width=700,Height=300} on=\\.\DISPLAY2
+MOVE window={X=60,Y=-472,Width=700,Height=300} on=\\.\DISPLAY2
+MOVE window={X=59,Y=-472,Width=700,Height=300} on=\\.\DISPLAY2
+
+## 4. X layout in the failing configuration (xrandr):
+eDP-1 connected primary 2560x1600+400+1440   (laptop, X primary)
+HDMI-A-1 connected 2560x1440+0+0             (external, above -> negative Y in Wine's virtual screen)
