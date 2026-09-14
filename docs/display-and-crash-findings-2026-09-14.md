@@ -99,11 +99,14 @@ is routed by position (`WindowFromPoint` at dispatch); the failure is in that ma
 window on a monitor at negative coordinates, with DPI virtualization (168/96) as the other
 suspect.
 
-**Re-run at a true 96 DPI** (fresh wineserver; registry `LogPixels=0xa8`; laptop primary;
-uniform scale): same result -- the user saw the window freeze on the external, app logged
-`total clicks ?`, last `WM_MOVE` `MOVE window={X=354,Y=-339,Width=700,Height=300} on=\\.\DISPLAY2`. **DPI virtualization is ruled out.**
-Remaining suspect: the external monitor sitting at negative coordinates (above the primary).
-Testing with the external as primary (all-positive coordinates). Workable answer on Wayland today:
+**Re-run in a fresh wineserver session, intended as a 96 DPI test, turned out to still be
+at 168** (the session read `LogPixels=0xa8`; an unverified `reg add 96` had not taken). Same
+result as before: window froze on the external, zero clicks delivered, `WM_MOVE` at
+`{X=354,Y=-339}` on `DISPLAY2`. That is a reproduction at 168, **not** a DPI test. The 96 DPI
+test is still pending and needs: `reg add ... LogPixels 96` *verified by `reg query`*, then every
+Wine process in the bottle gone (`wineserver -k`), then launch.
+
+Also being tested: the external as primary (all-positive coordinates), at 168. Workable answer on Wayland today:
 keep Paratext on one monitor. Likely better: a Plasma (X11) session.
 
 Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
