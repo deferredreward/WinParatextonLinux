@@ -14,11 +14,13 @@ Paratext 9.5 **runs and is usable on one monitor**: starts, main menu present, d
 installs resources, opens OT and NT resources, no crashes in a full session. Verified on
 Fedora 44 + Bottles 67.3 + `kron4ek-wine-11.17-staging-amd64` under KDE Plasma 6.7.5.
 
-Still open: a second monitor on a **Wayland** session. A Wine window moved to the external
-monitor stops taking input, in every configuration tried (mixed scale, X11-apps-scale-
-themselves, external as primary, uniform scale) -- see
-`docs/display-and-crash-findings-2026-09-14.md`. Scaling is ruled out. On Wayland, keep
-Paratext on one monitor. A **Plasma (X11)** session is the fallback being tested next.
+Second monitor on Wayland: **solved and understood.** Wine does not deliver mouse input to
+windows on a monitor at negative virtual-screen coordinates (i.e. above/left of the primary).
+Fix: make the top-left-most monitor the primary (`kscreen-doctor output.HDMI-A-1.primary`).
+Verified with a test window (`tools/TinyWin.cs`) in both directions; Paratext confirmation
+pending at the time of writing. Details and the evidence trail:
+`docs/display-and-crash-findings-2026-09-14.md`. Plasma (X11) remains an option, no longer a
+necessity.
 
 Read in this order: `docs/verified-recipe-fedora.md` (get it to start), then
 `docs/display-and-crash-findings-2026-09-14.md` (get it usable).
@@ -70,9 +72,9 @@ Tooling:
 
 ## Open questions
 
-- Dead input on the second monitor is **Wine's** (plain X11 app there works). Which Wine
-  mechanism? `tools/ScreenProbe.cs` reports Wine's monitor map and cursor clamping.
-- Does everything behave under Plasma (X11)? (Expected to sidestep the multi-monitor class.)
+- Paratext itself on the external with the external as primary (test window passed).
+- Can the laptop go back to scale 1.75 now that the primary is fixed? (untested)
+- Does everything behave under Plasma (X11)? (now optional)
 - Send/Receive on this runner, plugins, printing, spell check, non-Latin keyboards/IME.
 - Whether a non-staging runner plus `tools/keyboard-layouts-00000409.reg` is equivalent.
 - Whether a from-scratch install on the staging runner is as smooth as the upgrade path.

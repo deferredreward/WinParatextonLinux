@@ -110,11 +110,25 @@ Wine process in the bottle gone (`wineserver -k`), then launch.
 **External as primary (all-positive Wine coordinates), same 168 session, v2 test window:**
 clicks were delivered on **both** monitors, moved back and forth -- e.g. `CLICK 3 ... window=
 {X=0,Y=0} on=DISPLAY1` (external, now primary) and `CLICK 5 ... window={X=523,Y=1020}
-on=DISPLAY2` (laptop), nine clicks logged, none lost. A control run with the laptop primary
-again (external back at negative coordinates) follows; if that one goes dead on the external,
-the mechanism is confirmed: **Wine fails to route mouse input to windows on a monitor at
-negative virtual-screen coordinates**, and the fix on Wayland is to make the top-left-most
-monitor the primary (`kscreen-doctor output.<name>.primary`). Workable answer on Wayland today:
+on=DISPLAY2` (laptop), nine clicks logged, none lost. **Control, laptop primary again, same
+window, same session:** clicks delivered on the laptop, window dead on the external (user
+confirmed; window positions there logged at negative Y). One variable, opposite result.
+
+### Conclusion (verified)
+
+**Wine (11.17 staging, winex11 on XWayland) does not route mouse input to a window on a
+monitor whose virtual-screen coordinates are negative.** Wine puts the X primary monitor at
+(0,0); a monitor above or to the left of it gets negative coordinates and its windows go dead
+(X still delivers the events; Wine does not dispatch them; the window stops repainting).
+Everything else tried today -- XWayland scale settings, uniform monitor scale, DPI -- was a
+red herring for this symptom.
+
+**Fix on Wayland:** make the top-left-most monitor the primary so every monitor has
+non-negative coordinates: `kscreen-doctor output.HDMI-A-1.primary` (System Settings >
+Display > Primary). Applied and persisted here. Untested: whether the mixed 1/1.75 scale can
+now be restored (the earlier mixed-scale failures were all with the laptop as primary).
+
+This is a Wine bug worth reporting with `tools/TinyWin.cs` + this layout as the reproducer. Workable answer on Wayland today:
 keep Paratext on one monitor. Likely better: a Plasma (X11) session.
 
 Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
