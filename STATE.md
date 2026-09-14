@@ -17,8 +17,8 @@ Fedora 44 + Bottles 67.3 + `kron4ek-wine-11.17-staging-amd64` under KDE Plasma 6
 Second monitor on Wayland: **solved and understood.** Wine does not deliver mouse input to
 windows on a monitor at negative virtual-screen coordinates (i.e. above/left of the primary).
 Fix: make the top-left-most monitor the primary (`kscreen-doctor output.HDMI-A-1.primary`).
-Verified with a test window (`tools/TinyWin.cs`) in both directions; Paratext confirmation
-pending at the time of writing. Details and the evidence trail:
+Verified with a test window (`tools/TinyWin.cs`) in both directions and **confirmed with
+Paratext by the user**. Details and the evidence trail:
 `docs/display-and-crash-findings-2026-09-14.md`. Plasma (X11) remains an option, no longer a
 necessity.
 
@@ -72,8 +72,9 @@ Tooling:
 
 ## Open questions
 
-- Paratext itself on the external with the external as primary (test window passed).
-- Can the laptop go back to scale 1.75 now that the primary is fixed? (untested)
+- Laptop is back at scale 1.75 (external at 1, external primary). Paratext under this mixed
+  scale not re-tested; Wine windows on the external will render ~1x (KWin shrinks the
+  1.75x XWayland region). Uniform scale or a Plasma (X11) session avoids that.
 - Does everything behave under Plasma (X11)? (now optional)
 - Send/Receive on this runner, plugins, printing, spell check, non-Latin keyboards/IME.
 - Whether a non-staging runner plus `tools/keyboard-layouts-00000409.reg` is equivalent.

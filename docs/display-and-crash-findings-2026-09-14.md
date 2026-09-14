@@ -125,8 +125,9 @@ red herring for this symptom.
 
 **Fix on Wayland:** make the top-left-most monitor the primary so every monitor has
 non-negative coordinates: `kscreen-doctor output.HDMI-A-1.primary` (System Settings >
-Display > Primary). Applied and persisted here. Untested: whether the mixed 1/1.75 scale can
-now be restored (the earlier mixed-scale failures were all with the laptop as primary).
+Display > Primary). Applied and persisted here. **Paratext confirmed by the user on both
+monitors** (menu, toolbar, resource list, dragging text windows between screens). Laptop scale
+then restored to 1.75 with the external primary; Paratext under that mixed scale not yet re-tested.
 
 This is a Wine bug worth reporting with `tools/TinyWin.cs` + this layout as the reproducer. Workable answer on Wayland today:
 keep Paratext on one monitor. Likely better: a Plasma (X11) session.

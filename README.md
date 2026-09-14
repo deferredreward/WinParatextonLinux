@@ -3,12 +3,15 @@
 Notes and a working recipe for running Windows Paratext 9.5 or newer on Linux, since SIL
 dropped native Linux builds after 9.4.
 
-## Status (2026-09-14): runs; usable on one monitor
+## Status (2026-09-14, evening): works, on both monitors
 
-Paratext 9.5 starts, shows its main menu, downloads and installs resources, and opens OT and
-NT texts without crashing — on Fedora 44 with Bottles (Flatpak), a `wine-11.17 (Staging)`
-runner, DXVK turned off, and Wine drawing its own window frame. A second monitor under a
-Wayland session is still being worked out; see `STATE.md`.
+Paratext 9.5 starts, shows its main menu, downloads and installs resources, opens OT and NT
+texts, and works on both monitors of a laptop + external setup — on Fedora 44 with Bottles
+(Flatpak), a `wine-11.17 (Staging)` runner, DXVK turned off, Wine drawing its own window frame,
+and the **top-left-most monitor set as primary** (a Wine input-routing bug otherwise kills
+mouse input on any monitor at negative coordinates; see `docs/wine-bug-report-draft.md`).
+Known quirk: the first launch after any display change dies at the splash screen; the next
+launch works.
 
 The startup crash everyone hits (`Culture is not supported ... 0 (0x0000) is an invalid
 culture identifier`) is not a Paratext problem and not a configuration problem. It is two Wine
@@ -53,6 +56,7 @@ harmless.
 
 ## What is not yet known
 
-Opening a text works. Send/Receive on the new runner, plugins, the embedded Firefox panes,
-printing, spell check, and non-Latin keyboard/IME input have not been exercised yet. If you
-try them, please report what you find.
+Send/Receive on this runner, plugins, printing, spell check, and non-Latin keyboard/IME input
+have not been exercised. Mixed per-monitor scaling (laptop 1.75, external 1) makes Wine windows
+on the external small under Wayland; a Plasma (X11) session or uniform scaling avoids that. If
+you try any of these, please report what you find.
