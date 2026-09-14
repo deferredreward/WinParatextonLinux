@@ -43,7 +43,9 @@ Setup: laptop eDP-1 2560x1600 at scale 1.75 (primary, placed at +400,+1440); ext
 2. `kwriteconfig6 --file kdeglobals --group KScreen --key XwaylandClientsScale --type bool --notify false`
    -> X11 sees the external at its real 2560x1440, `Xft.dpi=96`, laptop presented at its
    logical 1463x914 and upscaled. **Clicks on the external still died** for a Paratext
-   subwindow dragged there. So scaling alone was not the whole story.
+   subwindow dragged there. Side effects: every Wine window on the laptop became ~3x
+   (Wine's 1.75x DPI, then KWin's 1.75x upscale), Logos misbehaved, and the maximized
+   Paratext window flickered. **Reverted to the default (`true`).** Not worth it.
 3. The X primary was the laptop at a non-origin position. Wine maps the X primary to Windows
    (0,0), putting the external at (-400,-1440) in Windows coordinates. Made the external
    primary with `kscreen-doctor output.HDMI-A-1.primary`. **Tested: did not help.** Clicks

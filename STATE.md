@@ -50,9 +50,10 @@ Usability (each verified with a log, details in the findings doc):
 - Do **not** add a Gecko `user.js` to `AppData\Local\Paratext95` to force software rendering:
   Paratext crashes at the splash screen. Do **not** use Wine's Wayland driver: third
   `InputLanguage` bug (`OverflowException`), unclickable popups.
-- On KDE Wayland the X11-app scaling control is `kdeglobals [KScreen] XwaylandClientsScale`,
-  applied live with `kwriteconfig6 --notify`; `kwinrc [Xwayland] Scale` is derived and gets
-  rewritten. With two monitors at different scales no single Wine DPI fits both.
+- On KDE Wayland the X11-app scaling control is `kdeglobals [KScreen] XwaylandClientsScale`
+  (`kwinrc [Xwayland] Scale` is derived). Setting it `false` did not fix the second monitor
+  and made every Wine window ~3x on the laptop; leave it at the default. With two monitors at
+  different scales no single Wine DPI fits both; on Wayland keep Wine apps on one monitor.
 
 Tooling:
 - `bottles-cli shell -b Paratext -i 'cmd /c C:/probe/x.bat'` is the way to run things in the
