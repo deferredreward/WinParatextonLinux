@@ -1,0 +1,21 @@
+Windows Registry Editor Version 5.00
+
+; Fallback for Wine builds WITHOUT the wine-staging "loader-KeyboardLayouts" patch
+; (Wine bug 47439). Upstream Wine's registry template has no
+; HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layouts keys at all, and .NET
+; Framework's InputLanguage.LayoutName opens "<Keyboard Layouts>\00000409" and calls
+; GetValue on it with no null check, so it throws NullReferenceException when the key
+; is missing. libpalaso reads LayoutName on the same line as Culture, so this is the
+; next crash after the culture one on a plain (non-staging) Wine >= 11.2.
+;
+; Not needed on wine-staging based runners (e.g. kron4ek-wine-11.x-staging), which
+; create these keys (empty) themselves.
+;
+; Import into a Bottles bottle:  bottle > Tools > Registry editor > File > Import
+; or, for a plain prefix:        wine regedit /path/to/keyboard-layouts-00000409.reg
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layouts]
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layouts\00000409]
+"Layout File"="KBDUS.DLL"
+"Layout Text"="US"
