@@ -52,7 +52,7 @@ Usability (each verified with a log, details in the findings doc):
   `Meta+drag`, `Meta+Shift+Right`, `Alt+F3`.
 - Paratext steals focus back from other Wine apps (Logos) within ~50 ms of losing it. KWin
   focus-stealing-prevention rules do NOT work for Wine windows (they also block user clicks;
-  Wine's globally-active focus model). Use `UseTakeFocus=N` in the bottle instead.
+  Wine's globally-active focus model). `UseTakeFocus=N` in the bottle fixes it -- verified.
 - Splash-screen crash (`AccessViolation` in `xul.dll`, Gecko init): the **first launch after
   any display change** dies (4/4 today, regardless of how long ago the change was); the next
   launch works (3/3). Just launch again.

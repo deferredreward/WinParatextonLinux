@@ -8,8 +8,9 @@ dropped native Linux builds after 9.4.
 Paratext 9.5 starts, shows its main menu, downloads and installs resources, opens OT and NT
 texts, and works on both monitors of a laptop + external setup — on Fedora 44 with Bottles
 (Flatpak), a `wine-11.17 (Staging)` runner, DXVK turned off, Wine drawing its own window frame,
-and the **top-left-most monitor set as primary** (a Wine input-routing bug otherwise kills
-mouse input on any monitor at negative coordinates; see `docs/wine-bug-report-draft.md`).
+the **top-left-most monitor set as primary** (a Wine input-routing bug otherwise kills mouse
+input on any monitor at negative coordinates; see `docs/wine-bug-report-draft.md`), and
+`UseTakeFocus=N` so it stops stealing focus from other Wine apps such as Logos.
 Known quirk: the first launch after any display change dies at the splash screen; the next
 launch works.
 

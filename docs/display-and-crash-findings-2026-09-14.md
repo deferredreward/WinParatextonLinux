@@ -9,6 +9,7 @@ was changed, and whether the result was verified. Unverified items are marked.
 | Symptom | Cause | Fix | Verified |
 |---|---|---|---|
 | Hard crash loading a resource (no .NET exception, `0x80000003` after DXVK swapchain churn) | Bottles enables DXVK by default; Paratext's embedded Firefox/Gecko renderer composites through D3D11 | `d3d11`, `dxgi`, `d3d9`, `d3d10core` = `builtin` (Wine's wined3d); `dxvk: false`, `vkd3d: false` | Yes: OT resources load, 0 exceptions in a full session |
+| Paratext steals focus back from Logos (another Wine app) | Wine's default globally-active X focus model + Paratext's foreground logic | `HKCU\Software\Wine\X11 Driver\UseTakeFocus = N` (Bottles `take_focus: false`, written explicitly). KWin focus rules do **not** work for Wine windows | Yes |
 | No main menu (the ☰ / logo / "Search menus/help" strip) | Paratext 9 draws a custom title bar; with WM decorations on, KWin's title bar covers it | `HKCU\Software\Wine\X11 Driver\Decorated = N` (`decorated: false` in Bottles) | Yes: strip appears. Its background is black (no DWM glass); cosmetic |
 | Menu bar / popups dead after moving a window to the second monitor | Wayland compositor scaling of XWayland clients with two monitors at different scales, plus (probably) the X primary monitor not being at the origin | See "Multi-monitor" below | Partially; see below |
 | Main window cannot be moved or resized | It is maximized (Paratext restores its saved state) and there is no WM title bar | KWin: `Meta+PgUp` un-maximize, `Meta+drag` move, `Meta+Shift+Right` next screen, `Alt+F3` menu | Yes |
@@ -163,7 +164,9 @@ switches to the passive model where the window manager assigns focus and Wine ac
 Wine cannot grab focus back on its own and user clicks are handled by KWin. Bottles' parameter
 is `take_focus: false` (note: `bottle.yml` already said false but the value had never been
 written to the registry; write it explicitly and verify with `reg query`). Takes effect on the
-next Paratext start (no display change involved, so no splash crash expected). Result: [pending].
+next Paratext start. **Result: verified by the user** -- Paratext stays behind Logos and takes focus
+normally when clicked. `_NET_ACTIVE_WINDOW` recording over 90 s: Paratext active 5 times,
+Logos 3 times, app-initiated re-takes within 0.5 s: none.
 
 ## Getting evidence instead of guessing
 
