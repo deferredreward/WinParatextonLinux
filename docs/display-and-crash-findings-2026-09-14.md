@@ -72,9 +72,12 @@ Setup: laptop eDP-1 2560x1600 at scale 1.75 (primary, placed at +400,+1440); ext
 Conclusion for Wayland (KDE Plasma 6.7.5, this laptop + HDMI monitor): a Wine window on the
 external monitor does not take input, in every configuration tried -- default mixed scale,
 `XwaylandClientsScale=false`, external as primary, and uniform scale. It works fully on the
-laptop panel. Whether this is KWin/XWayland or Wine is being separated with a plain X11
-program on the external monitor. Workable answer on Wayland today: keep Paratext on one
-monitor. Better answer: a Plasma (X11) session, where Wine talks to a real X server.
+laptop panel. **It is Wine, not KDE:** a plain X11 program (`xmessage`) placed on the
+external monitor took its button click normally, twice, while a Wine window there did not.
+Under uniform scale the Wine window comes back to life when moved back to the laptop (under
+the default mixed scale it stayed dead). Next: a .NET probe of what Wine believes the monitor
+layout and cursor position are (`tools/ScreenProbe.cs`). Workable answer on Wayland today:
+keep Paratext on one monitor. Likely better: a Plasma (X11) session.
 
 Side notes from the same session: a maximized Paratext window cannot be dragged (no WM title
 bar) -- KWin `Meta+PgUp` un-maximizes, `Meta+Shift+Right`/`Left` (arrow keys) sends a window

@@ -68,7 +68,8 @@ Tooling:
 
 ## Open questions
 
-- Is the dead-input-on-second-monitor KWin/XWayland or Wine? (Plain-X11-app test in progress.)
+- Dead input on the second monitor is **Wine's** (plain X11 app there works). Which Wine
+  mechanism? `tools/ScreenProbe.cs` reports Wine's monitor map and cursor clamping.
 - Does everything behave under Plasma (X11)? (Expected to sidestep the multi-monitor class.)
 - Send/Receive on this runner, plugins, printing, spell check, non-Latin keyboards/IME.
 - Whether a non-staging runner plus `tools/keyboard-layouts-00000409.reg` is equivalent.
