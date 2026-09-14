@@ -16,10 +16,18 @@ was changed, and whether the result was verified. Unverified items are marked.
 
 ## Things that made it worse (do not repeat)
 
-- **Gecko `user.js` with `layers.acceleration.disabled` / `gfx.webrender.software` etc.** in
-  `AppData\Local\Paratext95\` -> `AccessViolationException` in `xul.dll` inside
-  `Gecko.Xpcom.Initialize -> CreateWindowlessBrowser` while building the splash screen.
-  Paratext never starts. The pref names exist in that Gecko; the values kill it.
+- **Splash-screen crash: `AccessViolationException` in `xul.dll` inside
+  `Gecko.Xpcom.Initialize -> CreateWindowlessBrowser`.** Seen twice (14:45, 15:08), both
+  within 1-4 minutes of an XWayland screen reconfiguration (scale/primary changes); two
+  launches with identical configuration after the display had been stable 5-10 minutes
+  succeeded. In the crashing runs Gecko's first widget immediately pulled
+  `opengl32 -> wined3d -> dxgi -> d3d11` and faulted; in the good runs it went
+  `xul.dll -> dwrite.dll` and D3D came later. Inference (not proven): Gecko's graphics probe
+  hits a wined3d/GL context failure right after a display change and dereferences NULL.
+  **Rule: after changing monitors or scale, wait a few minutes before launching; if it dies
+  at the splash, launch again.** The first write-up blamed a Gecko `user.js`; the crash
+  recurred with that file gone, so that was wrong. A `user.js` forcing software rendering was
+  tried once and is not known to help; it is not in place.
 - **Wine's Wayland driver (`Graphics = wayland`).** The main menu strip *did* appear (which is
   how the decoration cause was found), but: `System.OverflowException` in
   `InputLanguage.get_Culture()` from `WM_INPUTLANGCHANGEREQUEST` (a third bug in the same .NET

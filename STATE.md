@@ -47,9 +47,11 @@ Usability (each verified with a log, details in the findings doc):
 - Wine DPI: `LogPixels` **and** Bottles' `custom_dpi` must agree or Bottles reverts it.
 - A maximized Paratext window cannot be dragged (no WM title bar). KWin: `Meta+PgUp`,
   `Meta+drag`, `Meta+Shift+Right`, `Alt+F3`.
-- Do **not** add a Gecko `user.js` to `AppData\Local\Paratext95` to force software rendering:
-  Paratext crashes at the splash screen. Do **not** use Wine's Wayland driver: third
-  `InputLanguage` bug (`OverflowException`), unclickable popups.
+- Splash-screen crash (`AccessViolation` in `xul.dll`, Gecko init) is intermittent and so far
+  only seen within minutes of a display/scale change; identical config launches fine once the
+  display has been stable. Relaunch. (Earlier blamed on a Gecko `user.js`; that was wrong.)
+- Do **not** use Wine's Wayland driver: third `InputLanguage` bug (`OverflowException`),
+  unclickable popups.
 - On KDE Wayland the X11-app scaling control is `kdeglobals [KScreen] XwaylandClientsScale`
   (`kwinrc [Xwayland] Scale` is derived). Setting it `false` did not fix the second monitor
   and made every Wine window ~3x on the laptop; leave it at the default. With two monitors at
@@ -59,6 +61,8 @@ Tooling:
 - `bottles-cli shell -b Paratext -i 'cmd /c C:/probe/x.bat'` is the way to run things in the
   bottle with output; Windows paths with backslashes get eaten on the way in, so use .bat.
 - `bottles-cli edit --runner` does not run the prefix update; run `wineboot -u` yourself.
+- `bottles-cli stop -b Paratext` hung >2 min; `pkill -x Paratext.exe` works (never
+  `pkill -f` with the path -- it matches your own shell).
 - Hard crashes never reach Paratext's log. `tools/launch-paratext-logged.sh` +
   `tools/analyze-paratext-log.sh`, with the bottle's `WINEDEBUG=+seh,+loaddll` and
   `ShowCrashDialog=0`, give module + backtrace + managed stack without clicking anything.
