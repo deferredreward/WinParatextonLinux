@@ -90,19 +90,20 @@ Bottles `fullscreen_capture`/`take_focus` off), so a configured grab is ruled ou
 The valid experiment is a Wine *window* (`tools/TinyWin.cs`) dragged to the external monitor
 and clicked, run with `WINEDEBUG=+event`. **Result (168 DPI session, laptop primary, uniform
 scale):** after the move Wine received 10 `ButtonPress`, 10 `ButtonRelease` and 536
-`MotionNotify` for the window and kept processing events on the app's thread, yet the app got
-**zero `WM_LBUTTONDOWN`** and stopped repainting. There was no `ConfigureNotify` storm (all 236
+`MotionNotify` for the window and kept processing events on the app's thread; the user saw the
+window stop responding. (The first version of the test window could not see clicks at all --
+its fill label swallowed them and only the form was listening -- so its "0 clicks" figure is
+**not evidence**. v2 listens on both.) There was no `ConfigureNotify` storm (all 236
 came during the drag, none after). Wine's own record of the window was sane: `WM_MOVE` reported
-`{X=316,Y=-339,W=700,H=300}` on `\\.\DISPLAY2`. So the X server delivers input to Wine, Wine
-knows where the window is, and Wine still fails to route the input to it. In Wine, mouse input
-is routed by position (`WindowFromPoint` at dispatch); the failure is in that mapping for a
-window on a monitor at negative coordinates, with DPI virtualization (168/96) as the other
-suspect.
+`{X=316,Y=-339,W=700,H=300}` on `\\.\DISPLAY2`. So the X server delivers input to Wine and Wine
+knows where the window is; whether Wine dispatches the input to the app is what the v2 test
+window measures. Suspects: position-based routing (`WindowFromPoint`) for a window on a monitor
+at negative coordinates, and DPI virtualization (168/96).
 
 **Re-run in a fresh wineserver session, intended as a 96 DPI test, turned out to still be
 at 168** (the session read `LogPixels=0xa8`; an unverified `reg add 96` had not taken). Same
-result as before: window froze on the external, zero clicks delivered, `WM_MOVE` at
-`{X=354,Y=-339}` on `DISPLAY2`. That is a reproduction at 168, **not** a DPI test. The 96 DPI
+result as before per the user: window unresponsive on the external; `WM_MOVE` at
+`{X=354,Y=-339}` on `DISPLAY2`. (Click count from that v1 window is void, see above.) That is a reproduction at 168, **not** a DPI test. The 96 DPI
 test is still pending and needs: `reg add ... LogPixels 96` *verified by `reg query`*, then every
 Wine process in the bottle gone (`wineserver -k`), then launch.
 
