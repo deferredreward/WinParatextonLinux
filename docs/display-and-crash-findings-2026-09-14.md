@@ -46,8 +46,18 @@ Setup: laptop eDP-1 2560x1600 at scale 1.75 (primary, placed at +400,+1440); ext
    subwindow dragged there. So scaling alone was not the whole story.
 3. The X primary was the laptop at a non-origin position. Wine maps the X primary to Windows
    (0,0), putting the external at (-400,-1440) in Windows coordinates. Made the external
-   primary with `kscreen-doctor output.HDMI-A-1.primary`. **Result not yet verified** at the
-   time of writing.
+   primary with `kscreen-doctor output.HDMI-A-1.primary`. **Tested: did not help.** Clicks
+   still died on the external, and the window then stayed dead even after being moved back
+   to the laptop. Reverted. Not the cause.
+4. Also observed with `XwaylandClientsScale=false`: the maximized main window flickers /
+   shakes on the laptop panel, where KWin is upscaling the X window 1.75x. Not investigated;
+   the X11 session test comes first.
+
+Conclusion for Wayland: with two monitors at different scales, KWin presents the same X11
+window at a different scale depending on which output it is on, and a Wine window that
+crosses between them stops taking input. Neither the global XWayland scale setting nor the
+primary monitor fixes it. Workable answer on Wayland: keep Paratext on one monitor (it works
+fully there). Better answer: a Plasma (X11) session, where one scale applies everywhere.
 
 Note the trade-off of item 2: with two monitors at different scales there is no single Wine
 `LogPixels` that is right on both; 168 fits the external, is oversized on the laptop.
@@ -72,7 +82,6 @@ plasma-workspace-x11`), being tested next. X11 has one desktop scale for all mon
 
 ## Not yet known
 
-- Whether making the external the primary monitor fixes clicks on it under Wayland.
 - How Paratext behaves under Plasma (X11).
 - Whether `Decorated=N` breaks anything else (dialog placement looked fine).
-- Whether Logos (separate prefix, `LogPixels=168` set) is affected by any of the above.
+- Logos (separate prefix): `LogPixels=168` verified to enlarge it as intended; nothing else tested.
