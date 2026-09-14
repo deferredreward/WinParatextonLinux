@@ -148,9 +148,11 @@ foreground logic reacting to focus loss, and Wine's default `UseTakeFocus=Y` let
 driver grab X input focus back. KWin's default focus-stealing prevention (Low) allows it.
 
 Fix applied (WM-side, scoped): `~/.config/kwinrulesrc` rule for `wmclass=paratext.exe` with
-`fsplevel=4` (Extreme) `fsplevelrule=2` (force); `gdbus call --session --dest org.kde.KWin
---object-path /KWin --method org.kde.KWin.reconfigure` applies it live. Result: [pending user
-confirmation]. Fallback if needed: `HKCU\Software\Wine\X11 Driver\UseTakeFocus=N` in the
+`fsplevelrule=2` (force); `gdbus call --session --dest org.kde.KWin --object-path /KWin
+--method org.kde.KWin.reconfigure` applies it live. `fsplevel=4` (Extreme) stopped the steal
+but also stopped Paratext taking focus when the user clicked it (Wine's `WM_TAKE_FOCUS` +
+`XSetInputFocus` handshake reads as a steal at Extreme) -- unusable. Now `fsplevel=3` (High):
+inactive apps cannot activate themselves, user clicks always work. Result: [pending]. Fallback if needed: `HKCU\Software\Wine\X11 Driver\UseTakeFocus=N` in the
 Paratext bottle (Bottles: `take_focus: false` -- note Bottles had not actually written that
 value to the registry even though `bottle.yml` said false).
 
