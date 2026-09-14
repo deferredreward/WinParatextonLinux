@@ -53,9 +53,9 @@ Usability (each verified with a log, details in the findings doc):
 - Paratext steals focus back from other Wine apps (Logos) within ~50 ms of losing it. KWin
   focus-stealing-prevention rules do NOT work for Wine windows (they also block user clicks;
   Wine's globally-active focus model). Use `UseTakeFocus=N` in the bottle instead.
-- Splash-screen crash (`AccessViolation` in `xul.dll`, Gecko init): happens on the **first
-  launch after any display change** (3 of 3 today); the next launch works (3 of 3). Just
-  launch again. (Earlier blamed on a Gecko `user.js`; that was wrong.)
+- Splash-screen crash (`AccessViolation` in `xul.dll`, Gecko init) hits some first launches
+  (4 today; trigger not established -- display changes and a killed previous instance both
+  preceded one). The next launch has worked every time. Just launch again.
 - Do **not** use Wine's Wayland driver: third `InputLanguage` bug (`OverflowException`),
   unclickable popups.
 - On KDE Wayland the X11-app scaling control is `kdeglobals [KScreen] XwaylandClientsScale`
