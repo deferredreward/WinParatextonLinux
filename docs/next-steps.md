@@ -49,3 +49,47 @@ Sizing, honestly:
 
 Recommendation: do the diagnosis first; commit to the build only if the fix looks small. The
 hard part -- a controlled reproducer with a single toggle -- is already done.
+
+## C. Paratext <-> Logos verse sync (same Wine prefix) -- evidenced, not yet attempted
+
+**Mechanism (verified from the binaries and registries, 2026-09-14):** Paratext's
+`LibronixLinker.dll` talks to Logos through Windows COM automation -- `GetActiveObject` /
+`CreateInstance` on `ILogosLauncher` (`Interop.Logos4Lib.dll`) or the legacy
+`LibronixDLS.LbxApplication`. Logos 10 (v53) registers its side **per-user in its own prefix**
+(`user.reg`): `LogosBibleSoftware.Launcher` -> CLSID `{319A0316-DF84-4B3C-8117-349B7E98E613}`
+-> `LocalServer32 = ...\Logos\System\LogosCom.exe` (an out-of-process COM server), and
+`LogosBibleSoftware.Application` -> `{FD24A0E8-C3F2-4821-A456-35DA2DC4BB8F}`. That first CLSID
+is one of the classes Paratext logged as "not registered" all day: Paratext was looking for
+Logos and finding an empty prefix. Under Wine, COM registration, the RPC endpoint mapper and
+the Running Object Table are all per wineserver, i.e. **per prefix** -- two prefixes can never
+talk. One shared prefix can, if Wine's out-of-process COM handles `LogosCom.exe` (standard
+Wine machinery; untested with these two apps).
+
+**Constraints:** Paratext needs Wine >= 11.2 staging (culture bug) and dotnet48 + gdiplus.
+Logos 53 is .NET Core self-contained (no Framework in its prefix) and is pinned by oudedetai
+4.0.0-beta.14 to `wine-staging_10.8` (AppImage). So the shared prefix must run 11.17 staging,
+and the open question is whether Logos runs on it. oudedetai supports `-p <dir with wine,
+wineserver>` (the kron4ek runner's `bin/` fits) and persists `wine_binary` in
+`~/.config/FaithLife-Community/oudedetai.json`; `--backup/--restore` exist too.
+
+**Cheapest safe path (Option 1, reuse the 14 GB Logos install):**
+1. Logos closed. Back up what a Wine-version bump touches: the prefix's `*.reg` files and
+   `drive_c/windows` (~1.1 GB together; the 13 GB of Logos resources are not touched).
+   `cp -a .../wine64_bottle/{system.reg,user.reg,userdef.reg} .../wine64_bottle/drive_c/windows  <backup>/`
+2. Test Logos on the new Wine: `oudedetai -p ~/.var/app/com.usebottles.bottles/data/bottles/runners/kron4ek-wine-11.17-staging-amd64/bin --run-installed-app`
+   (or set `wine_binary` to that `wine`). Wine will update the prefix once. If Logos misbehaves:
+   stop it, restore the backup, set `wine_binary` back -- done, nothing lost.
+3. If Logos is fine on 11.17: in that prefix, `winetricks -q dotnet48 gdiplus` (unverified
+   step -- Bottles used its own recipe), install Paratext, then apply the Paratext fixes
+   **per-app** so Logos is untouched:
+   `HKCU\Software\Wine\AppDefaults\Paratext.exe\X11 Driver` -> `Decorated=N`, `UseTakeFocus=N`;
+   `HKCU\Software\Wine\AppDefaults\Paratext.exe\DllOverrides` -> `d3d11/dxgi/d3d9/d3d10core=builtin`
+   (the Logos prefix has no DXVK, so this is belt-and-braces); `LogPixels` as wanted.
+4. Run both; in Paratext enable sending references to Logos (setting `ContextToLogos`, already
+   `True` here); change verse; watch Logos follow. Check Wine's stderr for `err:ole:` lines
+   naming `{319A0316-...}` or `LogosCom.exe` if it does not.
+5. Bottles then only manages the old Paratext bottle; the shared prefix is oudedetai's. A
+   `.desktop` launcher for Paratext in that prefix replaces the Bottles entry.
+
+Option 2 (Logos into the Bottles prefix) needs a full Logos re-download and resource copy --
+21 GB free makes that tight; only if Option 1 fails for reasons other than Wine 11.17 itself.
